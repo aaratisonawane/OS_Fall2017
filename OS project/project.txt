@@ -1,0 +1,47 @@
+Project statement: Jurassic Park consists of a dinosaur museum and a park for safari tiding.  There are n passengers and m single-passenger cars. Passengers wander around the museum for a while, then line up to take a ride in a safari car.  When a car is available, it loads the one passenger it can hold and rides around the park for a random amount of time.  If the m cars are all out riding passenger around, the passenger who wants to ride waits; if a car is ready to load but there are no waiting passengers, then the car waits.
+
+Main idea: Synchronization of the n passenger threads and the m car threads.
+
+This all process is done by using semaphores and threads.
+Threads: Total threads in my project = passenger_threads + car_threads
+Semaphores: There are two semaphores defined in my project: sem_t sem_passenger, sem_car.
+            To wait on a semaphore and to increment the value of a semaphore sem_wait() and sem_post() operations are used.
+            There is sem init() function for creating and initializing semaphores.
+The sem init() function is passed three parameters:
+1. A pointer to the semaphore
+2. A flag indicating the level of sharing
+3. The semaphore’s initial value
+
+Passenger code idea: 
+There are n passengers, therefore there are n passenger_threads. 
+Passenger wanders around the museum for a while and then line up to take a ride. 
+When a car is available, it loads the one passenger and rides around the park for a random amount of time by calling sleep (rand()%3) and then unload the passenger.
+If the m cars are all out riding passenger around, the passenger who wants to ride waits by calling sem_wait (&sem_visitor); i.e; if the value of semaphore sem_car is negative, the calling passenger_threads blocks. 
+One of the blocked passenger_threads wakes up when another passenger_threads calls sem_post (&sem_car) which will increase the value of semaphore sem_car and then the car will be available. 
+After that if passenger completes his  MAX_NO_RIDES then the passenger will come out otherwise he will line up again for next ride.
+
+Car code idea:
+There are m cars, therefore there are m car_threads.
+When a car is available, it loads the one passenger it can hold and rides around the park for a random amount of time by calling sleep (rand()%3) and then unload the passenger.
+If a car is ready to load but there are no waiting passengers, then the car waits by calling sem_wait(&sem_passenger).car_thread will be blocked at that time and wait on the semaphore and blocked car thread will restart when some other car_threads will perform sem_post(&sem_passenger) Operation by increasing value of semaphore sem_passenger.
+
+For project design diagram please refer ProjectDesignDocument file.
+
+Question-Answers related to project:
+
+1. How many threads/processes are there?
+Ans: There are passenger_threads + car_threads i.e if there are n number of 
+   passengers and m number of cars then, a number of threads = n + m.
+
+2. What does each thread/process simulate? 
+Ans: passenger_threads simulates threads for passengers and car_threads simulate threads for cars. If a car thread or passenger thread wish to use a resource,  these threads perform sem_wait (&sem_car) and sem_wait (&sem_passenger) operation on the semaphore respectively and when release a resource perform  sem_post (&sem_car) and sem_post (&sem_passenger) operation.
+
+3. Will each thread/process be blocked at some time of simulation? If yes, explain the circumstances.
+Ans: Each thread that wishes to use a resource performs a sem_wait() operation on the semaphore (thereby decrementing the
+count). When a thread releases a resource, it performs a sem_post() operation(incrementing the count). When the count for the semaphore goes to 0, all resources are being used. After that, a thread that wishes to use a resource will block until the count becomes greater than 0.  for example, in the project, there are n passengers and m cars. If m cars are all out riding passenger around, the passenger who wants to ride waits and passenger thread will be blocked. If a car is ready to load but there are no waiting passengers, then the car waits and car thread will be blocked.
+
+4.When will a blocked thread/process be waked up, and by whom?
+Ans: A thread that is blocked, waiting on a semaphore S, should be restarted when some other thread executes a sem_post() operation. 
+
+5. How many semaphores are there in your project, what is the purpose of having each?
+Ans :There are two semaphores in my project, sem_car, and sem_passenger. Its purpose is to lock the resource being used. A process which needs the resource will check the semaphore for determining the status of the resource followed by the decision for proceeding. The resources are synchronized by using the semaphore techniques. 
